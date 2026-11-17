@@ -50,12 +50,12 @@ img{max-width:100%;display:block}
 @media (max-width:430px){.nav-link.opt{display:none}.nav-name span{display:none}}
 
 /* hero */
-.hero{height:340vh;height:340svh;position:relative;background:var(--hero);color:var(--hero-ink)}
+.hero{height:640vh;height:640svh;position:relative;background:var(--hero);color:var(--hero-ink)}
 .stick{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;padding-top:calc(env(safe-area-inset-top,0px) + 74px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px);overflow:hidden}
 .hero-copy{position:relative;text-align:center;flex:none;padding:0 20px 6px}
 .hc{will-change:opacity,transform}
 #heroB,#packB{position:absolute;left:0;right:0;top:0}
-.pack{height:260vh;height:260svh}
+.hero.pack{height:260vh;height:260svh}
 .pk{font-size:clamp(34px,9.4vw,84px);letter-spacing:-.035em;line-height:1.02}
 #packB .pk{font-size:clamp(30px,8vw,56px);letter-spacing:-.03em}
 .kicker{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:22px;color:var(--navy);margin-bottom:6px}
@@ -70,6 +70,12 @@ img{max-width:100%;display:block}
 .hint i::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:7px;margin-left:-1.5px;border-radius:2px;background:#1D1D1F;animation:wheel 1.6s ease-in-out infinite}
 @keyframes wheel{0%{opacity:0;transform:translateY(-3px)}40%{opacity:1}100%{opacity:0;transform:translateY(8px)}}
 
+/* statement phrases inside hero */
+.veil{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:2}
+.phrases{position:absolute;inset:0;display:grid;place-items:center;z-index:3;pointer-events:none;padding:0 28px}
+.ph{margin:0;text-align:left;color:#F5F5F7;font-size:clamp(28px,7.6vw,58px);font-weight:700;letter-spacing:-.025em;line-height:1.16;max-width:880px;opacity:0;will-change:opacity,transform}
+.ph span{opacity:.2;transition:opacity .45s}
+.ph span.on{opacity:1}
 /* statement */
 .statement{background:var(--black);color:var(--on-black);padding:clamp(110px,22vw,200px) 0}
 .st-text{font-size:clamp(30px,6.6vw,58px);font-weight:700;line-height:1.16;letter-spacing:-.025em;max-width:880px}
@@ -275,13 +281,11 @@ footer{background:var(--black);color:#86868B;font-size:12px;text-align:center;pa
         </div>
       </div>
       <div class="canvas-box"><canvas id="seq" role="img" aria-label="The Performance Sleep Kit bag unzips from the middle and opens to show the topper, duvet and pillow packed inside"></canvas></div>
+      <div class="veil" id="veil" aria-hidden="true"></div>
+      <div class="phrases" id="phrases">
+        <p class="ph" id="stText"><span>A topper, </span><span>a pillow, </span><span>a duvet. </span><span>Everything you need to sleep, </span><span>in one bag. </span><span>Wherever you compete, </span><span>sleep the way you do at home.</span></p>
+      </div>
       <p class="hint" id="hint"><i aria-hidden="true"></i>Scroll</p>
-    </div>
-  </section>
-
-  <section class="statement" id="statement" data-nav="dark" aria-label="Concept">
-    <div class="wrap">
-      <p class="st-text" id="stText"><span>A topper, </span><span>a pillow, </span><span>a duvet. </span><span>Everything you need to sleep, </span><span>in one bag. </span><span>Wherever you compete, </span><span>sleep the way you do at home.</span></p>
     </div>
   </section>
 
@@ -433,16 +437,22 @@ const DUVET=["data:image/webp;base64,UklGRjQ9AABXRUJQVlA4ICg9AABQOgKdASqABIgCPqV
   load(0).then(()=>{S1.size();S2.size();(async()=>{for(let i=SEQ.length-1;i>0;i-=8)await load(i);for(let i=1;i<SEQ.length;i++)if(!frames[i])await load(i);S1.cur=S2.cur=-1;S1.draw(S1.want);S2.draw(S2.want)})()});
   addEventListener('resize',()=>{S1.size();S2.size()});
 
-  const hero=$('#hero'),A=$('#heroA'),B=$('#heroB'),hint=$('#hint');
+  const hero=$('#hero'),A=$('#heroA'),B=$('#heroB'),hint=$('#hint'),veil=$('#veil'),stP=$('#stText'),stW=$$('#stText span');let heroDark=false;
   function onHero(){
     const r=hero.getBoundingClientRect(),range=hero.offsetHeight-innerHeight;
     const p=reduce?1:clamp(-r.top/range);
-    S1.draw(Math.round(seg(p,.08,.82)*(SEQ.length-1)));
-    const a=seg(p,.02,.16),b=seg(p,.8,.92);
+    S1.draw(Math.round(seg(p,.03,.38)*(SEQ.length-1)));
+    const a=seg(p,.01,.07),b=seg(p,.35,.42)*(1-seg(p,.49,.54));
     A.style.opacity=1-a;A.style.transform=`translateY(${-a*24}px)`;
     B.style.opacity=b;B.style.transform=`translateY(${(1-b)*18}px)`;
     B.setAttribute('aria-hidden',b<.5);
-    hint.style.opacity=1-seg(p,0,.06);
+    hint.style.opacity=1-seg(p,0,.04);
+    const v=reduce?0:seg(p,.5,.58)*(1-seg(p,.95,.995));
+    veil.style.opacity=(v*.86).toFixed(3);heroDark=v>.45;
+    const inn=seg(p,.53,.6),out=seg(p,.92,.96),o=reduce?0:inn*(1-out);
+    stP.style.opacity=o.toFixed(3);stP.style.transform=`translateY(${((1-inn)*24-out*24).toFixed(1)}px)`;
+    const w=seg(p,.6,.88);
+    stW.forEach((s,i)=>s.classList.toggle('on',w>=(i+.5)/stW.length));
   }
 
   const pack=$('#flow'),PA=$('#packA'),PB=$('#packB');
@@ -456,23 +466,15 @@ const DUVET=["data:image/webp;base64,UklGRjQ9AABXRUJQVlA4ICg9AABQOgKdASqABIgCPqV
     PB.setAttribute('aria-hidden',b<.5);
   }
 
-  // statement words
-  const words=$$('#stText span'),st=$('#statement');
-  function onStatement(){
-    const r=st.getBoundingClientRect();
-    const p=clamp((innerHeight*.85-r.top)/(r.height*.75));
-    words.forEach((w,i)=>w.classList.toggle('on',reduce||p>(i+.5)/words.length));
-  }
-
   // nav tone
   const nav=$('#nav'),zones=$$('[data-nav]');
   function onNav(){
     const y=56;let t='page';
-    for(const z of zones){const r=z.getBoundingClientRect();if(r.top<=y&&r.bottom>y){t=z.dataset.nav;break}}
+    for(const z of zones){const r=z.getBoundingClientRect();if(r.top<=y&&r.bottom>y){t=z.dataset.nav;if(z.id==='hero'&&heroDark)t='dark';break}}
     nav.classList.toggle('dark',t==='dark');nav.classList.toggle('page',t==='page');
   }
   let raf=0;
-  function tick(){raf=0;onHero();onPack();onStatement();onNav()}
+  function tick(){raf=0;onHero();onPack();onNav()}
   addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(tick)},{passive:true});
   tick();
 
